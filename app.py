@@ -69,7 +69,7 @@ if uploaded_images:
 # CONTENEDOR PRINCIPAL: VISTA PREVIA (PLANTILLA INTEGRADA)
 # ---------------------------------------------------------
 st.subheader("🖨️ Vista Previa de la Plantilla Maestra (Mitad Hoja Carta)")
-st.markdown("Esta vista integra el diseño base con la sección izquierda (Frente) y la sección derecha (Reverso).")
+st.markdown("Esta vista integra el diseño base con la sección izquierda (Frente) y la sección derecha (Reverso) sin iconos sobrantes.")
 
 if not df.empty:
     
@@ -176,7 +176,8 @@ if not df.empty:
         cargo = cargo_raw if cargo_raw != 'nan' else 'SIN PUESTO'
         nombre_formateado = nombre if nombre.upper().startswith("C.") else f"C. {nombre}"
 
-        img_html = "👤"
+        # Si hay foto subida, la muestra; si no, deja el cuadro limpio sin icono por defecto
+        img_html = ""
         for key, file_obj in dict_images.items():
             if emp_id in key or nombre.split()[0] in key:
                 b64_str = base64.b64encode(file_obj.getvalue()).decode("utf-8")
@@ -238,7 +239,7 @@ if not df.empty:
         st.markdown(master_card_html, unsafe_allow_html=True)
         st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Plantilla Maestra Configurada:** Sube tu imagen base como fondo en la barra lateral para que encaje perfectamente con el diseño del semicírculo y el barco. Presiona `Ctrl + P` para imprimir.")
+    st.success("💡 **Plantilla Actualizada:** El icono genérico ha sido eliminado por completo. Sube tu imagen de fondo para que empate perfectamente con el diseño de la alcaldía y presiona `Ctrl + P` para imprimir.")
 
 else:
     st.warning("No hay registros en la base de datos.")
