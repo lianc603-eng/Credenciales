@@ -7,10 +7,10 @@ st.set_page_config(page_title="Generador de Gafetes - DDUMA", layout="wide")
 st.title("🏷️ Sistema de Generación Masiva de Gafetes")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
-# Inicializar DataFrame por defecto con la estructura esperada
+# Inicializar DataFrame por defecto
 if "data" not in st.session_state:
     st.session_state.data = pd.DataFrame([
-        {"No_Empleado": "9820", "Nombre": "C. CITLALLI ESTEFANÍA BROWN OCAÑA", "Cargo": "ANALISTA"}
+        {"NUMERO DE EMPLEADO": 5527, "Nombre completo": "NAVARRO PACHECO LEIDY CONSUELO", "Puesto": "AUXILIAR ADMINISTRATIVO"}
     ])
 
 # Barra lateral para cargar archivo de Excel o CSV
@@ -23,34 +23,39 @@ if uploaded_file is not None:
             st.session_state.data = pd.read_csv(uploaded_file)
         else:
             st.session_state.data = pd.read_excel(uploaded_file)
-        st.sidebar.success(f"¡Archivo cargado con {len(st.session_state.data)} filas!")
+        st.sidebar.success(f"¡Archivo cargado con éxito ({len(st.session_state.data)} registros)!")
     except Exception as e:
         st.sidebar.error(f"Error al leer el archivo: {e}")
 
 df = st.session_state.data
 
-# Sección 1: Configuración de Columnas (Mapeo Inteligente)
+# Detectar automáticamente las columnas del archivo subido
+columnas = list(df.columns)
+
+# Intentar auto-asignar si coinciden con los nombres exactos
+def_id = "NUMERO DE EMPLEADO" if "NUMERO DE EMPLEADO" in columnas else columnas[0]
+def_nombre = "Nombre completo" if "Nombre completo" in columnas else (columnas[1] if len(columnas) > 1 else columnas[0])
+def_puesto = "Puesto" if "Puesto" in columnas else (columnas[2] if len(columnas) > 2 else columnas[0])
+
+# Sección 1: Configuración y verificación de Columnas
 st.subheader("⚙️ Configuración de Columnas")
-st.markdown("Asegúrate de seleccionar la columna correcta de tu archivo para cada dato:")
-
-columnas_disponibles = list(df.columns)
-
 col1, col2, col3 = st.columns(3)
+
 with col1:
-    col_id = st.selectbox("1. Columna de Número de Empleado", columnas_disponibles, index=0 if len(columnas_disponibles) > 0 else 0)
+    col_id = st.selectbox("Columna de Número de Empleado", columnas, index=columnas.index(def_id) if def_id in columnas else 0)
 with col2:
-    col_nombre = st.selectbox("2. Columna de Nombre Completo", columnas_disponibles, index=min(3, len(columnas_disponibles)-1))
+    col_nombre = st.selectbox("Columna de Nombre Completo", columnas, index=columnas.index(def_nombre) if def_nombre in columnas else 0)
 with col3:
-    col_cargo = st.selectbox("3. Columna de Cargo / Puesto", columnas_disponibles, index=min(4, len(columnas_disponibles)-1))
+    col_puesto = st.selectbox("Columna de Puesto / Cargo", columnas, index=columnas.index(def_puesto) if def_puesto in columnas else 0)
 
 st.markdown("---")
 
-# Sección 2: Credenciales Generadas
+# Sección 2: Credenciales Generadas Masivamente
 st.subheader("🖨️ Credenciales Oficiales Generadas")
 
 if not df.empty:
     
-    # Estilos CSS exactos para replicar la estructura visual de la credencial
+    # Estilos CSS exactos para replicar la estructura visual de la credencial oficial
     st.markdown("""
     <style>
         .badge-card {
@@ -161,7 +166,7 @@ if not df.empty:
     </style>
     """, unsafe_allow_html=True)
 
-    # Mostrar tarjetas en filas de 3 columnas
+    # Mostrar tarjetas en filas de 3 columnas de manera masiva
     num_cols = 3
     rows_data = list(df.iterrows())
     
@@ -171,13 +176,18 @@ if not df.empty:
             if i + j < len(rows_data):
                 _, row = rows_data[i + j]
                 emp_id = str(row.get(col_id, ''))
-                nombre = str(row.get(col_nombre, ''))
-                cargo = str(row.get(col_cargo, ''))
+                nombre_raw = str(row.get(col_nombre, ''))
+                cargo_raw = str(row.get(col_puesto, ''))
 
-                # Formatear el nombre agregando "C. " si no lo incluye ya
+                # Limpieza de datos nulos o NaN
+                if emp_id == 'nan': emp_id = ''
+                nombre = nombre_raw if nombre_raw != 'nan' else ''
+                cargo = cargo_raw if cargo_raw != 'nan' else 'SIN PUESTO'
+
+                # Formatear el nombre con "C. " al inicio si no lo tiene
                 nombre_formateado = nombre if nombre.upper().startswith("C.") else f"C. {nombre}"
 
-                # HTML limpio y estructurado en una sola línea
+                # Renderizar tarjeta en HTML limpio de una sola línea
                 card_html = f'<div class="badge-card"><div class="badge-header"><h4>ALCALDÍA DE CAMPECHE</h4><p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p></div><div class="badge-photo">👤</div><div class="badge-auth">Se autoriza al</div><div class="badge-name">{nombre_formateado}</div><div class="badge-role-title">Como:</div><div class="badge-role">{cargo}</div><div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div><div class="badge-fields-box"><div class="badge-field-row"><div class="badge-field-label">ID</div><div class="badge-field-val">DDUMA-EMP-{emp_id}</div></div><div class="badge-field-row"><div class="badge-field-label">No. Empleado</div><div class="badge-field-val">{emp_id}</div></div></div></div>'
 
                 with cols[j]:
