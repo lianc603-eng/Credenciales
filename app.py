@@ -3,9 +3,9 @@ import pandas as pd
 import base64
 
 # Configuración de la página
-st.set_page_config(page_title="Plantilla Maestra de Gafetes - DDUMA", layout="wide")
+st.set_page_config(page_title="Plantilla Maestra de Credenciales - DDUMA", layout="wide")
 
-st.title("🏷️ Diseñador de Plantilla Maestra y Generador de Gafetes")
+st.title("🏷️ Diseñador de Plantilla Maestra (Frente y Reverso Integrados)")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
 # Inicializar DataFrame por defecto
@@ -24,9 +24,8 @@ texto_header_1 = st.sidebar.text_input("Texto Superior 1", "ALCALDÍA DE CAMPECH
 texto_header_2 = st.sidebar.text_input("Texto Superior 2", "H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027")
 texto_depto = st.sidebar.text_input("Texto de Dependencia", "Dirección de Desarrollo Urbano y Medio Ambiente")
 
-st.sidebar.subheader("2. Elementos Gráficos y Fondo")
-bg_color_header = st.sidebar.color_picker("Color del Encabezado", "#f28c28")
-bg_image_file = st.sidebar.file_uploader("Subir Imagen de Fondo para la Credencial", type=["jpg", "jpeg", "png"])
+st.sidebar.subheader("2. Imagen de Fondo de la Plantilla")
+bg_image_file = st.sidebar.file_uploader("Subir Imagen Base de la Credencial (Fondo)", type=["jpg", "jpeg", "png"])
 
 bg_image_b64 = ""
 if bg_image_file is not None:
@@ -60,7 +59,6 @@ col_id = st.sidebar.selectbox("Columna ID / No. Empleado", columnas, index=colum
 col_nombre = st.sidebar.selectbox("Columna Nombre", columnas, index=columnas.index(def_nombre) if def_nombre in columnas else 0)
 col_puesto = st.sidebar.selectbox("Columna Puesto", columnas, index=columnas.index(def_puesto) if def_puesto in columnas else 0)
 
-# Carga masiva de fotos individuales
 uploaded_images = st.sidebar.file_uploader("Subir fotos de empleados (JPG/PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 dict_images = {}
 if uploaded_images:
@@ -68,88 +66,101 @@ if uploaded_images:
         dict_images[img_file.name] = img_file
 
 # ---------------------------------------------------------
-# CONTENEDOR PRINCIPAL: VISTA PREVIA OPTIMIZADA (MITAD CARTA)
+# CONTENEDOR PRINCIPAL: VISTA PREVIA (PLANTILLA INTEGRADA)
 # ---------------------------------------------------------
-st.subheader("🖨️ Vista Previa de la Plantilla (Diseñada para Mitad de Hoja Carta)")
-st.markdown("Modifica los parámetros en la barra lateral izquierda y se actualizará toda la plantilla maestra al instante.")
+st.subheader("🖨️ Vista Previa de la Plantilla Maestra (Mitad Hoja Carta)")
+st.markdown("Esta vista integra el diseño base con la sección izquierda (Frente) y la sección derecha (Reverso).")
 
 if not df.empty:
     
-    # Estilos CSS con llaves escapadas correctamente {{ }}
     bg_style = f"background-image: url('data:image/jpeg;base64,{bg_image_b64}'); background-size: cover; background-position: center;" if bg_image_b64 else "background-color: #ffffff;"
 
     st.markdown(f"""
     <style>
-        .page-container {{
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }}
-        .badge-card {{
-            width: 340px;
-            height: 500px;
-            border: 2px dashed #94a3b8;
-            border-radius: 8px;
+        .master-card {{
+            width: 700px;
+            height: 480px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
             {bg_style}
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             font-family: Arial, sans-serif;
+            position: relative;
+            margin: 0 auto 30px auto;
+            display: flex;
             overflow: hidden;
+        }}
+        /* Lado Izquierdo: FRENTE */
+        .side-front {{
+            width: 50%;
+            height: 100%;
             position: relative;
             text-align: center;
             padding: 10px;
-            margin-bottom: 20px;
         }}
-        .badge-header {{
-            background-color: {bg_color_header};
-            height: 105px;
-            border-bottom-left-radius: 160px;
-            border-bottom-right-radius: 160px;
-            color: white;
-            padding-top: 12px;
-            margin: -10px -10px 0 -10px;
-        }}
-        .badge-header h4 {{ font-size: 11px; margin: 0; font-weight: bold; }}
-        .badge-header p {{ font-size: 6.5px; margin: 2px 0 0 0; }}
         .badge-photo-box {{
             width: 75px;
             height: 90px;
             background-color: #e2e8f0;
-            border: 3px solid #ffffff;
+            border: 2px solid #ffffff;
             border-radius: 3px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            margin: -30px auto 4px auto;
+            position: absolute;
+            top: 75px;
+            left: 110px;
             overflow: hidden;
-            position: relative;
-            z-index: 5;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 5;
         }}
         .badge-photo-box img {{
             width: 100%;
             height: 100%;
             object-fit: cover;
         }}
-        .badge-auth {{ font-size: 8px; color: #475569; margin-top: 2px; font-weight: bold; }}
-        .badge-name {{ font-size: 11.5px; font-weight: bold; color: #c2410c; margin: 3px 8px; text-transform: uppercase; line-height: 1.1; }}
-        .badge-role-title {{ font-size: 7.5px; color: #64748b; margin: 0; font-weight: bold; }}
-        .badge-role {{ font-size: 10px; font-weight: bold; color: #0f172a; text-transform: uppercase; margin-bottom: 6px; }}
+        .badge-content {{
+            position: absolute;
+            top: 180px;
+            width: 100%;
+            left: 0;
+            padding: 0 15px;
+        }}
+        .badge-auth {{ font-size: 8.5px; color: #475569; font-weight: bold; margin-bottom: 2px; }}
+        .badge-name {{ font-size: 11px; font-weight: bold; color: #c2410c; text-transform: uppercase; line-height: 1.1; margin-bottom: 4px; }}
+        .badge-role-title {{ font-size: 7.5px; color: #64748b; font-weight: bold; margin: 0; }}
+        .badge-role {{ font-size: 10px; font-weight: bold; color: #0f172a; text-transform: uppercase; margin-bottom: 10px; }}
         .badge-footer-dept {{
             font-size: 8px;
             color: #1e293b;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
-            padding: 4px;
-            margin: 4px auto 10px auto;
-            width: 90%;
+            padding: 3px;
+            margin: 0 auto 8px auto;
+            width: 85%;
             background-color: rgba(255, 255, 255, 0.9);
             font-weight: bold;
         }}
-        .badge-fields-box {{ padding: 0 10px; }}
-        .badge-field-row {{ display: flex; margin-bottom: 3px; border-radius: 3px; overflow: hidden; font-size: 8.5px; font-family: monospace; border: 1px solid #cbd5e1; }}
-        .badge-field-label {{ background-color: {bg_color_header}; color: white; padding: 3px 4px; font-weight: bold; width: 40%; text-align: center; }}
-        .badge-field-val {{ background-color: rgba(241, 245, 249, 0.9); color: #1e293b; padding: 3px 4px; width: 60%; text-align: center; font-weight: bold; }}
+        .badge-field-row {{ display: flex; margin-bottom: 3px; border-radius: 3px; overflow: hidden; font-size: 8px; font-family: monospace; border: 1px solid #cbd5e1; width: 85%; margin-left: auto; margin-right: auto; }}
+        .badge-field-label {{ background-color: #f28c28; color: white; padding: 2px 4px; font-weight: bold; width: 40%; text-align: center; }}
+        .badge-field-val {{ background-color: rgba(241, 245, 249, 0.9); color: #1e293b; padding: 2px 4px; width: 60%; text-align: center; font-weight: bold; }}
+
+        /* Lado Derecho: REVERSO */
+        .side-back {{
+            width: 50%;
+            height: 100%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }}
+        .rev-folio {{ display: inline-block; background-color: #f28c28; color: white; font-size: 8px; font-weight: bold; padding: 2px 10px; border-radius: 4px; }}
+        .rev-legal {{ font-size: 5.5px; color: #334155; text-align: justify; line-height: 1.2; }}
+        .rev-signs {{ display: flex; justify-content: space-around; font-size: 6px; color: #1e293b; }}
+        .rev-sign-line {{ border-top: 1px solid #64748b; width: 100px; margin: 12px auto 2px auto; }}
+        .rev-alert-box {{ background-color: #f28c28; color: white; border-radius: 5px; padding: 4px; font-size: 6px; text-align: center; }}
+        .rev-vigencia {{ font-size: 8px; font-weight: bold; color: #c2410c; }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -172,39 +183,62 @@ if not df.empty:
                 img_html = f'<img src="data:image/jpeg;base64,{b64_str}">'
                 break
 
-        front_html = f'''
-        <div class="badge-card">
-            <div class="badge-header">
-                <h4>{texto_header_1}</h4>
-                <p>{texto_header_2}</p>
+        master_card_html = f'''
+        <div class="master-card">
+            <!-- FRENTE (IZQUIERDA) -->
+            <div class="side-front">
+                <div class="badge-photo-box">{img_html}</div>
+                <div class="badge-content">
+                    <div class="badge-auth">Se autoriza al</div>
+                    <div class="badge-name">{nombre_formateado}</div>
+                    <div class="badge-role-title">Como:</div>
+                    <div class="badge-role">{cargo}</div>
+                    <div class="badge-footer-dept">{texto_depto}</div>
+                    <div class="badge-field-row">
+                        <div class="badge-field-label">ID</div>
+                        <div class="badge-field-val">DDUMA-EMP-{emp_id}</div>
+                    </div>
+                    <div class="badge-field-row">
+                        <div class="badge-field-label">No. Empleado</div>
+                        <div class="badge-field-val">{emp_id}</div>
+                    </div>
+                </div>
             </div>
-            <div class="badge-photo-box">{img_html}</div>
-            <div class="badge-auth">Se autoriza al</div>
-            <div class="badge-name">{nombre_formateado}</div>
-            <div class="badge-role-title">Como:</div>
-            <div class="badge-role">{cargo}</div>
-            <div class="badge-footer-dept">{texto_depto}</div>
-            <div class="badge-fields-box">
-                <div class="badge-field-row">
-                    <div class="badge-field-label">ID</div>
-                    <div class="badge-field-val">DDUMA-EMP-{emp_id}</div>
+
+            <!-- REVERSO (DERECHA) -->
+            <div class="side-back">
+                <div>
+                    <div style="font-size:9px; font-weight:bold; color:#f28c28;">ALCALDÍA DE CAMPECHE</div>
+                    <span class="rev-folio">Folio &nbsp; 0{emp_id[-3:] if len(emp_id)>=3 else emp_id}/DDUMA/2026</span>
                 </div>
-                <div class="badge-field-row">
-                    <div class="badge-field-label">No. Empleado</div>
-                    <div class="badge-field-val">{emp_id}</div>
+                <div class="rev-legal">
+                    <b>Esta credencial es válida únicamente para actos de naturaleza indicadas.</b><br>
+                    La presente identificación se emite con fundamento en los artículos 14, 16, 115 fracción V, de la Constitución Política de los Estados Unidos Mexicanos; 105 de la Constitución Política del Estado de Campeche; 189, 190 de la Ley Orgánica de los Municipios del Estado de Campeche; y ordenamientos aplicables; con vigencia al 31 de diciembre de 2026.
                 </div>
+                <div class="rev-signs">
+                    <div>
+                        <div class="rev-sign-line"></div>
+                        <b>{nombre_formateado}</b><br>Firma del Trabajador
+                    </div>
+                    <div>
+                        <div class="rev-sign-line"></div>
+                        <b>Lic. Rosendo Sánchez Preve</b><br>Director de Desarrollo Urbano
+                    </div>
+                </div>
+                <div class="rev-alert-box">
+                    <b>° El uso indebido de esta credencial constituye un delito.<br>° Quejas, denuncias y en caso de extravió:</b><br>
+                    <span style="font-size:8.5px; font-weight:bold;">Tel: 981 102 1212</span>
+                </div>
+                <div class="rev-vigencia">Vigencia al 31 de diciembre de 2026</div>
             </div>
         </div>
         '''
 
-        col_center = st.columns([1, 2, 1])
-        with col_center[1]:
-            st.markdown(f"**Credencial para: {nombre_formateado} (Emp: {emp_id})**")
-            st.markdown(front_html, unsafe_allow_html=True)
-            
-        st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 15px 0;'>", unsafe_allow_html=True)
+        st.markdown(f"**Credencial Completa (Frente y Reverso) para: {nombre_formateado}**")
+        st.markdown(master_card_html, unsafe_allow_html=True)
+        st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Plantilla Maestra Lista:** Modifica cualquier texto o color en el menú lateral izquierdo. Al presionar `Ctrl + P`, la interfaz está adaptada para imprimir cómodamente en formato físico o PDF a la mitad de tu hoja carta.")
+    st.success("💡 **Plantilla Maestra Configurada:** Sube tu imagen base como fondo en la barra lateral para que encaje perfectamente con el diseño del semicírculo y el barco. Presiona `Ctrl + P` para imprimir.")
 
 else:
     st.warning("No hay registros en la base de datos.")
