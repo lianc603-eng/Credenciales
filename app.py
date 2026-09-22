@@ -7,7 +7,7 @@ st.set_page_config(page_title="Generador de Gafetes - DDUMA", layout="wide")
 st.title("🏷️ Sistema de Generación Masiva de Gafetes")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
-# Inicializar DataFrame por defecto
+# Inicializar DataFrame por defecto con la estructura esperada
 if "data" not in st.session_state:
     st.session_state.data = pd.DataFrame([
         {"No_Empleado": "9820", "Nombre": "C. CITLALLI ESTEFANÍA BROWN OCAÑA", "Cargo": "ANALISTA"}
@@ -29,19 +29,19 @@ if uploaded_file is not None:
 
 df = st.session_state.data
 
-# Sección 1: Configuración de Columnas
+# Sección 1: Configuración de Columnas (Mapeo Inteligente)
 st.subheader("⚙️ Configuración de Columnas")
-st.markdown("Selecciona con precisión qué columna de tu archivo corresponde a cada dato:")
+st.markdown("Asegúrate de seleccionar la columna correcta de tu archivo para cada dato:")
 
 columnas_disponibles = list(df.columns)
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    col_id = st.selectbox("Columna de No. de Empleado / ID", columnas_disponibles, index=0 if len(columnas_disponibles) > 0 else 0)
+    col_id = st.selectbox("1. Columna de Número de Empleado", columnas_disponibles, index=0 if len(columnas_disponibles) > 0 else 0)
 with col2:
-    col_nombre = st.selectbox("Columna de Nombre Completo", columnas_disponibles, index=min(3, len(columnas_disponibles)-1))
+    col_nombre = st.selectbox("2. Columna de Nombre Completo", columnas_disponibles, index=min(3, len(columnas_disponibles)-1))
 with col3:
-    col_cargo = st.selectbox("Columna de Cargo / Puesto", columnas_disponibles, index=min(4, len(columnas_disponibles)-1))
+    col_cargo = st.selectbox("3. Columna de Cargo / Puesto", columnas_disponibles, index=min(4, len(columnas_disponibles)-1))
 
 st.markdown("---")
 
@@ -174,8 +174,11 @@ if not df.empty:
                 nombre = str(row.get(col_nombre, ''))
                 cargo = str(row.get(col_cargo, ''))
 
-                # HTML limpio en una sola línea para evitar problemas de interpretación en Markdown
-                card_html = f'<div class="badge-card"><div class="badge-header"><h4>ALCALDÍA DE CAMPECHE</h4><p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p></div><div class="badge-photo">👤</div><div class="badge-auth">Se autoriza al</div><div class="badge-name">{nombre}</div><div class="badge-role-title">Como:</div><div class="badge-role">{cargo}</div><div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div><div class="badge-fields-box"><div class="badge-field-row"><div class="badge-field-label">ID</div><div class="badge-field-val">DDUMA-EMP-{emp_id}</div></div><div class="badge-field-row"><div class="badge-field-label">No. Empleado</div><div class="badge-field-val">{emp_id}</div></div></div></div>'
+                # Formatear el nombre agregando "C. " si no lo incluye ya
+                nombre_formateado = nombre if nombre.upper().startswith("C.") else f"C. {nombre}"
+
+                # HTML limpio y estructurado en una sola línea
+                card_html = f'<div class="badge-card"><div class="badge-header"><h4>ALCALDÍA DE CAMPECHE</h4><p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p></div><div class="badge-photo">👤</div><div class="badge-auth">Se autoriza al</div><div class="badge-name">{nombre_formateado}</div><div class="badge-role-title">Como:</div><div class="badge-role">{cargo}</div><div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div><div class="badge-fields-box"><div class="badge-field-row"><div class="badge-field-label">ID</div><div class="badge-field-val">DDUMA-EMP-{emp_id}</div></div><div class="badge-field-row"><div class="badge-field-label">No. Empleado</div><div class="badge-field-val">{emp_id}</div></div></div></div>'
 
                 with cols[j]:
                     st.markdown(card_html, unsafe_allow_html=True)
