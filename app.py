@@ -3,9 +3,9 @@ import pandas as pd
 import base64
 
 # Configuración de la página
-st.set_page_config(page_title="Plantilla Maestra Oficial - DDUMA", layout="wide")
+st.set_page_config(page_title="Plantilla Maestra - Credenciales Oficiales", layout="wide")
 
-st.title("🎨 Creador de Plantilla Maestra y Credenciales Oficiales")
+st.title("🎨 Creador de Plantilla Maestra y Credenciales (Media Carta)")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
 # Inicializar DataFrame por defecto
@@ -35,8 +35,13 @@ foto_height = st.sidebar.slider("Alto de la Foto (px)", 100, 300, 160)
 st.sidebar.subheader("3. Textos Personalizados Ilimitados")
 if "textos_libres" not in st.session_state:
     st.session_state.textos_libres = [
-        {"texto": "Se autoriza al", "x": 30, "y": 50, "size": 11, "color": "#64748b", "bold": True},
-        {"texto": "DIRECCIÓN DE DESARROLLO URBANO Y MEDIO AMBIENTE", "x": 12, "y": 74, "size": 9, "color": "#64748b", "bold": True}
+        {"texto": "Se autoriza al", "x": 28, "y": 48, "size": 11, "color": "#64748b", "bold": True},
+        {"texto": "{NOMBRE}", "x": 12, "y": 53, "size": 13, "color": "#d35400", "bold": True},
+        {"texto": "Como:", "x": 42, "y": 62, "size": 9, "color": "#64748b", "bold": True},
+        {"texto": "{PUESTO}", "x": 25, "y": 67, "size": 11, "color": "#1e293b", "bold": True},
+        {"texto": "Dirección de Desarrollo Urbano y Medio Ambiente", "x": 12, "y": 75, "size": 8.5, "color": "#64748b", "bold": False},
+        {"texto": "DDUMA-EMP-{ID}", "x": 22, "y": 85, "size": 9, "color": "#334155", "bold": True},
+        {"texto": "{ID}", "x": 32, "y": 92, "size": 9, "color": "#334155", "bold": True}
     ]
 
 if st.sidebar.button("➕ Agregar Nuevo Texto"):
@@ -171,14 +176,13 @@ if not df.empty:
             txt_contenido = t["texto"].replace("{NOMBRE}", nombre_formateado).replace("{PUESTO}", cargo).replace("{ID}", emp_id)
             textos_html += f'<div style="position: absolute; top: {t["y"]}%; left: {t["x"]}%; font-size: {t["size"]}px; color: {t["color"]}; font-weight: {"bold" if t["bold"] else "normal"}; z-index: 10; text-transform: uppercase;">{txt_contenido}</div>'
 
-        # HTML estructurado estrictamente en una sola línea para evitar problemas de visualización
-        canvas_html = f'<div class="master-canvas"><div class="side-front"><div class="canvas-photo">{img_html}</div>{textos_html}</div><div class="side-back"><div><div style="font-size:11px; font-weight:bold; color:#f28c28;">ALCALDÍA DE CAMPECHE</div><span class="rev-folio">Folio &nbsp; 0{emp_id[-3:] if len(emp_id)>=3 else emp_id}/DDUMA/2026</span></div><div class="rev-legal"><b>Esta credencial es válida únicamente para actos de naturaleza indicadas.</b><br>La presente identificación se emite con fundamento en los artículos 14, 16, 115 fracción V, de la Constitución Política de los Estados Unidos Mexicanos; 105 de la Constitución Política del Estado de Campeche; y ordenamientos aplicables de la Dirección de Desarrollo Urbano y Medio Ambiente.</div><div class="rev-signs"><div><div class="rev-sign-line"></div><b>{nombre_formateado}</b><br>Firma del Trabajador</div><div><div class="rev-sign-line"></div><b>Lic. Rosendo Sánchez Preve</b><br>Director de Desarrollo Urbano</div></div><div class="rev-alert-box"><b>° El uso indebido de esta credencial constituye un delito.<br>° En caso de extravío reportar al:</b><br><span style="font-size:9.5px; font-weight:bold;">Tel: 981 102 1212</span></div><div class="rev-vigencia">Vigencia al 31 de diciembre de 2026</div></div></div>'
+        canvas_html = f'<div class="master-canvas"><div class="side-front"><div class="canvas-photo">{img_html}</div>{textos_html}</div><div class="side-back"><div><div style="font-size:11px; font-weight:bold; color:#f28c28;">ALCALDÍA DE CAMPECHE</div><span class="rev-folio">Folio &nbsp; 0{emp_id[-3:] if len(emp_id)>=3 else emp_id}/DDUMA/2026</span></div><div class="rev-legal"><b>Esta credencial is válida únicamente para actos de naturaleza indicadas.</b><br>La presente identificación se emite con fundamento en los artículos 14, 16, 115 fracción V, de la Constitución Política de los Estados Unidos Mexicanos; 105 de la Constitución Política del Estado de Campeche; y ordenamientos aplicables de la Dirección de Desarrollo Urbano y Medio Ambiente.</div><div class="rev-signs"><div><div class="rev-sign-line"></div><b>{nombre_formateado}</b><br>Firma del Trabajador</div><div><div class="rev-sign-line"></div><b>Lic. Rosendo Sánchez Preve</b><br>Director de Desarrollo Urbano</div></div><div class="rev-alert-box"><b>° El uso indebido de esta credencial constituye un delito.<br>° En caso de extravío reportar al:</b><br><span style="font-size:9.5px; font-weight:bold;">Tel: 981 102 1212</span></div><div class="rev-vigencia">Vigencia al 31 de diciembre de 2026</div></div></div>'
 
         st.markdown(f"**Credencial para: {nombre_formateado} (Emp: {emp_id})**")
         st.markdown(canvas_html, unsafe_allow_html=True)
         st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 25px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Plantilla Actualizada:** El código HTML se ha compactado en una sola línea para que se renderice correctamente en la interfaz gráfica. Presiona `Ctrl + P` para imprimir.")
+    st.success("💡 **Plantilla Actualizada:** Usa las etiquetas `{NOMBRE}`, `{PUESTO}` o `{ID}` en tus textos personalizados para que cambien automáticamente por cada empleado. Presiona `Ctrl + P` para imprimir.")
 
 else:
     st.warning("No hay registros en la base de datos.")
