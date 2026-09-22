@@ -45,7 +45,7 @@ with col3:
 
 st.markdown("---")
 
-# Sección 2: Credenciales Generadas con el Diseño Exacto
+# Sección 2: Credenciales Generadas
 st.subheader("🖨️ Credenciales Oficiales Generadas")
 
 if not df.empty:
@@ -54,106 +54,98 @@ if not df.empty:
     st.markdown("""
     <style>
         .badge-card {
-            width: 320px;
-            height: 480px;
+            width: 300px;
+            height: 460px;
             border: 2px solid #cbd5e1;
             border-radius: 10px;
             background-color: #ffffff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             font-family: Arial, sans-serif;
             overflow: hidden;
-            margin-bottom: 25px;
+            margin: 0 auto 20px auto;
             text-align: center;
-            display: inline-block;
         }
-        /* Semicírculo superior naranja */
         .badge-header {
             background-color: #f28c28;
-            height: 110px;
-            border-bottom-left-radius: 160px;
-            border-bottom-right-radius: 160px;
+            height: 100px;
+            border-bottom-left-radius: 150px;
+            border-bottom-right-radius: 150px;
             color: white;
-            padding-top: 15px;
+            padding-top: 12px;
         }
         .badge-header h4 {
-            font-size: 11px;
+            font-size: 10px;
             margin: 0;
             font-weight: bold;
             letter-spacing: 0.5px;
         }
         .badge-header p {
-            font-size: 7px;
+            font-size: 6.5px;
             margin: 2px 0 0 0;
         }
-        /* Contenedor de la foto superpuesto en el borde del semicírculo */
-        .badge-photo-container {
-            margin-top: -35px;
-            display: flex;
-            justify-content: center;
-            position: relative;
-            z-index: 5;
-        }
         .badge-photo {
-            width: 80px;
-            height: 95px;
+            width: 70px;
+            height: 85px;
             background-color: #e2e8f0;
             border: 3px solid #ffffff;
             border-radius: 3px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: -30px auto 5px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 24px;
+            position: relative;
+            z-index: 5;
         }
         .badge-auth {
-            font-size: 9px;
+            font-size: 8px;
             color: #64748b;
-            margin-top: 4px;
+            margin-top: 2px;
         }
         .badge-name {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #d35400;
-            margin: 4px 12px;
+            margin: 3px 10px;
             text-transform: uppercase;
             line-height: 1.1;
         }
         .badge-role-title {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #94a3b8;
-            margin: 2px 0 0 0;
+            margin: 0;
             font-weight: bold;
         }
         .badge-role {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: #1e293b;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
         .badge-footer-dept {
-            font-size: 8px;
+            font-size: 7.5px;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             padding: 0 10px;
         }
-        /* Bloques inferiores de ID y No. de Empleado */
         .badge-fields-box {
-            padding: 0 20px;
+            padding: 0 15px;
         }
         .badge-field-row {
             display: flex;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             border-radius: 3px;
             overflow: hidden;
-            font-size: 9px;
+            font-size: 8.5px;
             font-family: monospace;
             border: 1px solid #cbd5e1;
         }
         .badge-field-label {
             background-color: #f28c28;
             color: white;
-            padding: 4px 6px;
+            padding: 3px 5px;
             font-weight: bold;
             width: 42%;
             text-align: center;
@@ -161,7 +153,7 @@ if not df.empty:
         .badge-field-val {
             background-color: #f1f5f9;
             color: #334155;
-            padding: 4px 6px;
+            padding: 3px 5px;
             width: 58%;
             text-align: center;
             font-weight: bold;
@@ -182,37 +174,11 @@ if not df.empty:
                 nombre = str(row.get(col_nombre, ''))
                 cargo = str(row.get(col_cargo, ''))
 
+                # HTML limpio en una sola línea para evitar problemas de interpretación en Markdown
+                card_html = f'<div class="badge-card"><div class="badge-header"><h4>ALCALDÍA DE CAMPECHE</h4><p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p></div><div class="badge-photo">👤</div><div class="badge-auth">Se autoriza al</div><div class="badge-name">{nombre}</div><div class="badge-role-title">Como:</div><div class="badge-role">{cargo}</div><div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div><div class="badge-fields-box"><div class="badge-field-row"><div class="badge-field-label">ID</div><div class="badge-field-val">DDUMA-EMP-{emp_id}</div></div><div class="badge-field-row"><div class="badge-field-label">No. Empleado</div><div class="badge-field-val">{emp_id}</div></div></div></div>'
+
                 with cols[j]:
-                    st.markdown(f"""
-                    <div class="badge-card">
-                        <div class="badge-header">
-                            <h4>ALCALDÍA DE CAMPECHE</h4>
-                            <p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p>
-                        </div>
-                        
-                        <div class="badge-photo-container">
-                            <div class="badge-photo">👤</div>
-                        </div>
-                        
-                        <div class="badge-auth">Se autoriza al</div>
-                        <div class="badge-name">{nombre}</div>
-                        <div class="badge-role-title">Como:</div>
-                        <div class="badge-role">{cargo}</div>
-                        
-                        <div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div>
-                        
-                        <div class="badge-fields-box">
-                            <div class="badge-field-row">
-                                <div class="badge-field-label">ID</div>
-                                <div class="badge-field-val">DDUMA-EMP-{emp_id}</div>
-                            </div>
-                            <div class="badge-field-row">
-                                <div class="badge-field-label">No. Empleado</div>
-                                <div class="badge-field-val">{emp_id}</div>
-                            </div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown(card_html, unsafe_allow_html=True)
 
     st.markdown("---")
     st.success("💡 **Impresión masiva:** Presiona `Ctrl + P` en tu teclado para mandar a imprimir todos los gafetes en formato físico o guardarlos en PDF directamente desde tu navegador.")
