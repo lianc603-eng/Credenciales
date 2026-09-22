@@ -3,9 +3,9 @@ import pandas as pd
 import base64
 
 # Configuración de la página
-st.set_page_config(page_title="Editor de Credenciales - Textos Múltiples", layout="wide")
+st.set_page_config(page_title="Editor de Credenciales - Sin Fondo Gris", layout="wide")
 
-st.title("🎨 Plantilla Maestra con Textos Múltiples (Media Carta)")
+st.title("🎨 Plantilla Maestra (Sin Cuadro Gris por Defecto)")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
 # Inicializar DataFrame por defecto
@@ -15,25 +15,22 @@ if "data" not in st.session_state:
     ])
 
 # ---------------------------------------------------------
-# BARRA LATERAL: CONTROLES DE LA PLANTILLA MAESTRA Y TEXTOS MÚLTIPLES
+# BARRA LATERAL: CONTROLES DE LA PLANTILLA MAESTRA
 # ---------------------------------------------------------
 st.sidebar.header("🛠️ Controles de Plantilla (Media Carta)")
 
-# 1. Imagen de Fondo
 st.sidebar.subheader("1. Imagen de Fondo (Plantilla)")
 bg_file = st.sidebar.file_uploader("Sube tu plantilla base (JPG/PNG)", type=["jpg", "jpeg", "png"])
 bg_b64 = ""
 if bg_file is not None:
     bg_b64 = base64.b64encode(bg_file.getvalue()).decode("utf-8")
 
-# 2. Posición y Tamaño de la Foto
 st.sidebar.subheader("2. Posición y Tamaño de la Foto")
 foto_left = st.sidebar.slider("Posición Izquierda (X %)", 0, 80, 12)
 foto_top = st.sidebar.slider("Posición Arriba (Y %)", 0, 80, 25)
 foto_width = st.sidebar.slider("Ancho de la Foto (px)", 80, 300, 150)
 foto_height = st.sidebar.slider("Alto de la Foto (px)", 100, 350, 200)
 
-# 3. Textos Personalizables Múltiples
 st.sidebar.subheader("3. Textos Libres Múltiples")
 
 st.sidebar.markdown("--- **Texto 1** ---")
@@ -57,7 +54,6 @@ t3_y = st.sidebar.slider("T3 - Posición Y (%)", 0, 90, 88)
 t3_size = st.sidebar.slider("T3 - Tamaño (px)", 8, 30, 10)
 t3_color = st.sidebar.color_picker("T3 - Color", "#64748b")
 
-# 4. Base de Datos y Fotos
 st.sidebar.subheader("4. Base de Datos y Fotos")
 uploaded_file = st.sidebar.file_uploader("Sube tu archivo base.xlsx o CSV", type=["xlsx", "csv"])
 
@@ -93,7 +89,7 @@ if uploaded_images:
 # RENDERIZADO DEL LIENZO: TAMAÑO MEDIA CARTA REAL
 # ---------------------------------------------------------
 st.subheader("🖨️ Vista Previa en Formato Media Carta")
-st.markdown("Cada credencial integra múltiples textos libres e independientes posicionados desde el panel izquierdo.")
+st.markdown("El recuadro gris ha sido eliminado. Solo se mostrará la foto cuando esté cargada.")
 
 if not df.empty:
     
@@ -121,10 +117,6 @@ if not df.empty:
         .canvas-photo {{
             width: {foto_width}px;
             height: {foto_height}px;
-            background-color: #e2e8f0;
-            border: 3px solid #ffffff;
-            border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             position: absolute;
             top: {foto_top}%;
             left: {foto_left}%;
@@ -209,7 +201,7 @@ if not df.empty:
         st.markdown(canvas_html, unsafe_allow_html=True)
         st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 25px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Plantilla Actualizada con Textos Múltiples:** Configura el contenido, posición, tamaño y color de cada texto desde la barra lateral. Presiona `Ctrl + P` para imprimir.")
+    st.success("💡 **Plantilla Actualizada:** El recuadro gris ha sido eliminado. Sube las fotografías de los empleados para que aparezcan exactamente en las coordenadas configuradas.")
 
 else:
     st.warning("No hay registros en la base de datos.")
