@@ -2,21 +2,16 @@ import streamlit as st
 import pandas as pd
 import base64
 
-# Configuración de la página
-st.set_page_config(page_title="Generador de Credenciales - DDUMA", layout="wide")
+st.set_page_config(page_title="Plantilla Maestra - Credenciales DDUMA", layout="wide")
 
 st.title("🎨 Creador de Plantilla Maestra y Credenciales (Media Carta)")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
-# Inicializar DataFrame por defecto si no hay datos cargados
 if "data" not in st.session_state:
     st.session_state.data = pd.DataFrame([
         {"NUMERO DE EMPLEADO": 5332, "Nombre completo": "MAY MASS REYNA ANTONIA", "Puesto": "ANALISTA"}
     ])
 
-# ---------------------------------------------------------
-# BARRA LATERAL: CONTROLES DE LA PLANTILLA MAESTRA
-# ---------------------------------------------------------
 st.sidebar.header("🛠️ Controles de Plantilla Maestra")
 
 st.sidebar.subheader("1. Imagen de Fondo (Plantilla Media Carta)")
@@ -31,7 +26,6 @@ foto_top = st.sidebar.slider("Posición Arriba (Y %)", 0, 80, 24)
 foto_width = st.sidebar.slider("Ancho de la Foto (px)", 80, 250, 130)
 foto_height = st.sidebar.slider("Alto de la Foto (px)", 100, 300, 160)
 
-# 3. Textos Personalizados Ilimitados
 st.sidebar.subheader("3. Textos Personalizados Ilimitados")
 if "textos_libres" not in st.session_state:
     st.session_state.textos_libres = [
@@ -39,7 +33,7 @@ if "textos_libres" not in st.session_state:
         {"texto": "{NOMBRE}", "x": 12, "y": 53, "size": 13, "color": "#d35400", "bold": True},
         {"texto": "Como:", "x": 42, "y": 62, "size": 9, "color": "#64748b", "bold": True},
         {"texto": "{PUESTO}", "x": 25, "y": 67, "size": 11, "color": "#1e293b", "bold": True},
-        {"texto": "Dirección de Desarrollo Urbano y Medio Ambiente", "x": 12, "y": 75, "size": 8.5, "color": "#64748b", "bold": False},
+        {"texto": "Dirección de Desarrollo Urbano y Medio Ambiente", "x": 12, "y": 75, "size": 9, "color": "#64748b", "bold": False},
         {"texto": "DDUMA-EMP-{ID}", "x": 22, "y": 85, "size": 9, "color": "#334155", "bold": True},
         {"texto": "{ID}", "x": 32, "y": 92, "size": 9, "color": "#334155", "bold": True}
     ]
@@ -47,13 +41,39 @@ if "textos_libres" not in st.session_state:
 if st.sidebar.button("➕ Agregar Nuevo Texto"):
     st.session_state.textos_libres.append({"texto": "Nuevo Texto", "x": 10, "y": 60, "size": 10, "color": "#334155", "bold": False})
 
-for i, t in enumerate(st.session_state.textos_libres):
+for i in range(len(st.session_state.textos_libres)):
     st.sidebar.markdown(f"--- **Texto #{i+1}** ---")
-    st.session_state.textos_libres[i]["texto"] = st.sidebar.text_input(f"Contenido #{i+1}", t["texto"], key=f"t_val_{i}")
-    st.session_state.textos_libres[i]["x"] = st.sidebar.slider(f"X (%) #{i+1}", 0, 80, t["x"], key=f"t_x_{i}")
-    st.session_state.textos_libres[i]["y"] = st.sidebar.slider(f"Y (%) #{i+1}", 0, 95, t["y"], key=f"t_y_{i}")
-    st.session_state.textos_libres[i]["size"] = st.sidebar.slider(f"Tamaño (px) #{i+1}", 6, 25, t["size"], key=f"t_size_{i}")
-    st.session_state.textos_libres[i]["color"] = st.sidebar.color_picker(f"Color #{i+1}", t["color"], key=f"t_color_{i}")
+    st.session_state.textos_libres[i]["texto"] = st.sidebar.text_input(
+        f"Contenido #{i+1}", 
+        value=str(st.session_state.textos_libres[i]["texto"]), 
+        key=f"t_val_{i}"
+    )
+    st.session_state.textos_libres[i]["x"] = st.sidebar.slider(
+        f"X (%) #{i+1}", 
+        min_value=0, 
+        max_value=80, 
+        value=int(st.session_state.textos_libres[i]["x"]), 
+        key=f"t_x_{i}"
+    )
+    st.session_state.textos_libres[i]["y"] = st.sidebar.slider(
+        f"Y (%) #{i+1}", 
+        min_value=0, 
+        max_value=95, 
+        value=int(st.session_state.textos_libres[i]["y"]), 
+        key=f"t_y_{i}"
+    )
+    st.session_state.textos_libres[i]["size"] = st.sidebar.slider(
+        f"Tamaño (px) #{i+1}", 
+        min_value=6, 
+        max_value=25, 
+        value=int(round(float(st.session_state.textos_libres[i]["size"]))), 
+        key=f"t_size_{i}"
+    )
+    st.session_state.textos_libres[i]["color"] = st.sidebar.color_picker(
+        f"Color #{i+1}", 
+        value=st.session_state.textos_libres[i]["color"], 
+        key=f"t_color_{i}"
+    )
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("4. Cargar Base de Datos y Fotos")
@@ -72,7 +92,6 @@ if uploaded_file is not None:
 df = st.session_state.data
 columnas = list(df.columns)
 
-# Mapeo de columnas con base en tu Excel (`NUMERO DE EMPLEADO`, `Nombre completo`, `Puesto`)
 def_id = "NUMERO DE EMPLEADO" if "NUMERO DE EMPLEADO" in columnas else columnas[0]
 def_nombre = "Nombre completo" if "Nombre completo" in columnas else (columnas[1] if len(columnas) > 1 else columnas[0])
 def_puesto = "Puesto" if "Puesto" in columnas else (columnas[2] if len(columnas) > 2 else columnas[0])
@@ -88,14 +107,9 @@ if uploaded_images:
     for img_file in uploaded_images:
         dict_images[img_file.name] = img_file
 
-# ---------------------------------------------------------
-# RENDERIZADO DEL LIENZO: TAMAÑO MEDIA CARTA REAL
-# ---------------------------------------------------------
 st.subheader("🖨️ Vista Previa en Formato Media Carta")
-st.markdown("Visualiza y ajusta cada elemento para obtener un resultado idéntico al gafete institucional.")
 
 if not df.empty:
-    
     bg_style = f"background-image: url('data:image/jpeg;base64,{bg_b64}'); background-size: cover; background-position: center;" if bg_b64 else "background-color: #ffffff; border: 2px dashed #cbd5e1;"
 
     st.markdown(f"""
@@ -174,8 +188,9 @@ if not df.empty:
 
         textos_html = ""
         for t in st.session_state.textos_libres:
-            txt_contenido = t["texto"].replace("{NOMBRE}", nombre_formateado).replace("{PUESTO}", cargo).replace("{ID}", emp_id)
-            textos_html += f'<div style="position: absolute; top: {t["y"]}%; left: {t["x"]}%; font-size: {t["size"]}px; color: {t["color"]}; font-weight: {"bold" if t["bold"] else "normal"}; z-index: 10; text-transform: uppercase;">{txt_contenido}</div>'
+            txt_contenido = str(t["texto"]).replace("{NOMBRE}", nombre_formateado).replace("{PUESTO}", cargo).replace("{ID}", emp_id)
+            weight = "bold" if t.get("bold", False) else "normal"
+            textos_html += f'<div style="position: absolute; top: {t["y"]}%; left: {t["x"]}%; font-size: {t["size"]}px; color: {t["color"]}; font-weight: {weight}; z-index: 10; text-transform: uppercase;">{txt_contenido}</div>'
 
         canvas_html = f'<div class="master-canvas"><div class="side-front"><div class="canvas-photo">{img_html}</div>{textos_html}</div><div class="side-back"><div><div style="font-size:11px; font-weight:bold; color:#f28c28;">ALCALDÍA DE CAMPECHE</div><span class="rev-folio">Folio &nbsp; 0{emp_id[-3:] if len(emp_id)>=3 else emp_id}/DDUMA/2026</span></div><div class="rev-legal"><b>Esta credencial es válida únicamente para actos de naturaleza indicadas.</b><br>La presente identificación se emite con fundamento en los artículos 14, 16, 115 fracción V, de la Constitución Política de los Estados Unidos Mexicanos; 105 de la Constitución Política del Estado de Campeche; y ordenamientos aplicables de la Dirección de Desarrollo Urbano y Medio Ambiente.</div><div class="rev-signs"><div><div class="rev-sign-line"></div><b>{nombre_formateado}</b><br>Firma del Trabajador</div><div><div class="rev-sign-line"></div><b>Lic. Rosendo Sánchez Preve</b><br>Director de Desarrollo Urbano</div></div><div class="rev-alert-box"><b>° El uso indebido de esta credencial constituye un delito.<br>° En caso de extravío reportar al:</b><br><span style="font-size:9.5px; font-weight:bold;">Tel: 981 102 1212</span></div><div class="rev-vigencia">Vigencia al 31 de diciembre de 2026</div></div></div>'
 
@@ -183,7 +198,6 @@ if not df.empty:
         st.markdown(canvas_html, unsafe_allow_html=True)
         st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 25px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Plantilla Lista:** Utiliza las etiquetas `{NOMBRE}`, `{PUESTO}` o `{ID}` en tus textos personalizados para que se reemplacen automáticamente con los datos de tu Excel. Presiona `Ctrl + P` para imprimir.")
-
+    st.success("💡 **Plantilla Maestra Lista:** Ajusta coordenadas o agrega más campos en la barra lateral. Presiona `Ctrl + P` para imprimir.")
 else:
     st.warning("No hay registros en la base de datos.")
