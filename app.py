@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
+import base64
 
 # Configuración de la página
-st.set_page_config(page_title="Generador de Credenciales - DDUMA", layout="wide")
+st.set_page_config(page_title="Plantilla Maestra de Gafetes - DDUMA", layout="wide")
 
-st.title("🏷️ Sistema de Generación Masiva de Credenciales Oficiales")
+st.title("🏷️ Diseñador de Plantilla Maestra y Generador de Gafetes")
 st.markdown("Dirección de Desarrollo Urbano y Medio Ambiente (DDUMA) - Alcaldía de Campeche")
 
 # Inicializar DataFrame por defecto
@@ -13,8 +14,26 @@ if "data" not in st.session_state:
         {"NUMERO DE EMPLEADO": 9820, "Nombre completo": "BROWN OCAÑA CITLALLI ESTEFANIA", "Puesto": "JEFE DE DEPARTAMENTO"}
     ])
 
-# Barra lateral para cargar archivo
-st.sidebar.header("📁 Cargar Plantilla Maestra")
+# ---------------------------------------------------------
+# BARRA LATERAL: CONFIGURACIÓN GENERAL DE LA PLANTILLA MAESTRA
+# ---------------------------------------------------------
+st.sidebar.header("🎨 Editor de Plantilla Maestra")
+
+st.sidebar.subheader("1. Textos Institucionales")
+texto_header_1 = st.sidebar.text_input("Texto Superior 1", "ALCALDÍA DE CAMPECHE")
+texto_header_2 = st.sidebar.text_input("Texto Superior 2", "H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027")
+texto_depto = st.sidebar.text_input("Texto de Dependencia", "Dirección de Desarrollo Urbano y Medio Ambiente")
+
+st.sidebar.subheader("2. Elementos Gráficos y Fondo")
+bg_color_header = st.sidebar.color_picker("Color del Encabezado", "#f28c28")
+bg_image_file = st.sidebar.file_uploader("Subir Imagen de Fondo para la Credencial", type=["jpg", "jpeg", "png"])
+
+bg_image_b64 = ""
+if bg_image_file is not None:
+    bg_bytes = bg_image_file.getvalue()
+    bg_image_b64 = base64.b64encode(bg_bytes).decode("utf-8")
+
+st.sidebar.subheader("3. Cargar Datos y Fotos")
 uploaded_file = st.sidebar.file_uploader("Sube tu archivo base.xlsx o CSV", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
@@ -23,117 +42,120 @@ if uploaded_file is not None:
             st.session_state.data = pd.read_csv(uploaded_file)
         else:
             st.session_state.data = pd.read_excel(uploaded_file)
-        st.sidebar.success(f"¡Archivo cargado con {len(st.session_state.data)} registros!")
+        st.sidebar.success(f"¡Cargado con {len(st.session_state.data)} registros!")
     except Exception as e:
         st.sidebar.error(f"Error al leer el archivo: {e}")
 
 df = st.session_state.data
 columnas = list(df.columns)
 
-# Mapeo de columnas automático o manual
+# Mapeo automático de columnas
 def_id = "NUMERO DE EMPLEADO" if "NUMERO DE EMPLEADO" in columnas else columnas[0]
 def_nombre = "Nombre completo" if "Nombre completo" in columnas else (columnas[1] if len(columnas) > 1 else columnas[0])
 def_puesto = "Puesto" if "Puesto" in columnas else (columnas[2] if len(columnas) > 2 else columnas[0])
 
-st.subheader("⚙️ Configuración de Columnas")
-col1, col2, col3 = st.columns(3)
-with col1:
-    col_id = st.selectbox("Columna de Número de Empleado", columnas, index=columnas.index(def_id) if def_id in columnas else 0)
-with col2:
-    col_nombre = st.selectbox("Columna de Nombre Completo", columnas, index=columnas.index(def_nombre) if def_nombre in columnas else 0)
-with col3:
-    col_puesto = st.selectbox("Columna de Puesto / Cargo", columnas, index=columnas.index(def_puesto) if def_puesto in columnas else 0)
+st.sidebar.markdown("---")
+st.sidebar.header("⚙️ Columnas de la Base")
+col_id = st.sidebar.selectbox("Columna ID / No. Empleado", columnas, index=columnas.index(def_id) if def_id in columnas else 0)
+col_nombre = st.sidebar.selectbox("Columna Nombre", columnas, index=columnas.index(def_nombre) if def_nombre in columnas else 0)
+col_puesto = st.sidebar.selectbox("Columna Puesto", columnas, index=columnas.index(def_puesto) if def_puesto in columnas else 0)
 
-st.markdown("---")
+# Carga masiva de fotos individuales
+uploaded_images = st.sidebar.file_uploader("Subir fotos de empleados (JPG/PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+dict_images = {}
+if uploaded_images:
+    for img_file in uploaded_images:
+        dict_images[img_file.name] = img_file
 
-st.subheader("🖨️ Credenciales Oficiales (Frente y Reverso)")
+# ---------------------------------------------------------
+# CONTENEDOR PRINCIPAL: VISTA PREVIA OPTIMIZADA (MITAD CARTA)
+# ---------------------------------------------------------
+st.subheader("🖨️ Vista Previa de la Plantilla (Diseñada para Mitad de Hoja Carta)")
+st.markdown("Modifica los parámetros en la barra lateral izquierda y se actualizará toda la plantilla maestra al instante.")
 
 if not df.empty:
     
-    # Estilos CSS avanzados para ambas caras de la credencial
-    st.markdown("""
+    # Estilos CSS adaptados a las dimensiones físicas aproximadas para la mitad de una hoja carta
+    bg_style = f"background-image: url('data:image/jpeg;base64,{bg_image_b64}'); background-size: cover; background-position: center;" if bg_image_b64 else "background-color: #ffffff;"
+
+    st.markdown(f"""
     <style>
-        .badge-wrapper {
+        .page-container {{
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
             flex-wrap: wrap;
-        }
-        .badge-card {
-            width: 310px;
-            height: 470px;
-            border: 2px solid #cbd5e1;
+            gap: 20px;
+            justify-content: center;
+        }}
+        .badge-card {{
+            width: 340px;
+            height: 500px;
+            border: 2px dashed #94a3b8;
             border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            {bg_style}
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             font-family: Arial, sans-serif;
             overflow: hidden;
             position: relative;
             text-align: center;
             padding: 10px;
+            margin-bottom: 20px;
         }
-        /* FRENTE */
-        .badge-header {
-            background-color: #f28c28;
-            height: 95px;
-            border-bottom-left-radius: 140px;
-            border-bottom-right-radius: 140px;
+        .badge-header {{
+            background-color: {bg_color_header};
+            height: 105px;
+            border-bottom-left-radius: 160px;
+            border-bottom-right-radius: 160px;
             color: white;
-            padding-top: 10px;
+            padding-top: 12px;
             margin: -10px -10px 0 -10px;
-        }
-        .badge-header h4 { font-size: 10px; margin: 0; font-weight: bold; }
-        .badge-header p { font-size: 6px; margin: 2px 0 0 0; }
-        .badge-photo {
-            width: 68px;
-            height: 80px;
+        }}
+        .badge-header h4 {{ font-size: 11px; margin: 0; font-weight: bold; }}
+        .badge-header p {{ font-size: 6.5px; margin: 2px 0 0 0; }}
+        .badge-photo-box {{
+            width: 75px;
+            height: 90px;
             background-color: #e2e8f0;
             border: 3px solid #ffffff;
             border-radius: 3px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            margin: -25px auto 4px auto;
+            margin: -30px auto 4px auto;
+            overflow: hidden;
+            position: relative;
+            z-index: 5;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            position: relative;
-            z-index: 5;
         }
-        .badge-auth { font-size: 7.5px; color: #64748b; margin-top: 1px; }
-        .badge-name { font-size: 10.5px; font-weight: bold; color: #d35400; margin: 2px 8px; text-transform: uppercase; line-height: 1.1; }
-        .badge-role-title { font-size: 7px; color: #94a3b8; margin: 0; font-weight: bold; }
-        .badge-role { font-size: 9.5px; font-weight: bold; color: #1e293b; text-transform: uppercase; margin-bottom: 4px; }
-        .badge-footer-dept {
-            font-size: 7.5px;
-            color: #555;
+        .badge-photo-box img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+        .badge-auth {{ font-size: 8px; color: #475569; margin-top: 2px; font-weight: bold; }}
+        .badge-name {{ font-size: 11.5px; font-weight: bold; color: #c2410c; margin: 3px 8px; text-transform: uppercase; line-height: 1.1; }}
+        .badge-role-title {{ font-size: 7.5px; color: #64748b; margin: 0; font-weight: bold; }}
+        .badge-role {{ font-size: 10px; font-weight: bold; color: #0f172a; text-transform: uppercase; margin-bottom: 6px; }}
+        .badge-footer-dept {{
+            font-size: 8px;
+            color: #1e293b;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
-            padding: 3px;
-            margin: 4px auto 8px auto;
-            width: 85%;
-            background-color: #f8fafc;
+            padding: 4px;
+            margin: 4px auto 10px auto;
+            width: 90%;
+            background-color: rgba(255, 255, 255, 0.9);
             font-weight: bold;
-        }
-        .badge-fields-box { padding: 0 10px; }
-        .badge-field-row { display: flex; margin-bottom: 3px; border-radius: 3px; overflow: hidden; font-size: 8px; font-family: monospace; border: 1px solid #cbd5e1; }
-        .badge-field-label { background-color: #f28c28; color: white; padding: 2px 4px; font-weight: bold; width: 40%; text-align: center; }
-        .badge-field-val { background-color: #f1f5f9; color: #334155; padding: 2px 4px; width: 60%; text-align: center; font-weight: bold; }
-
-        /* REVERSO */
-        .rev-header { border-bottom: 1px solid #f28c28; padding-bottom: 4px; margin-bottom: 4px; text-align: center; }
-        .rev-header img, .rev-header-text { font-size: 9px; font-weight: bold; color: #f28c28; }
-        .rev-folio { display: inline-block; background-color: #f28c28; color: white; font-size: 8px; font-weight: bold; padding: 2px 10px; border-radius: 4px; margin: 3px 0; }
-        .rev-legal { font-size: 5px; color: #666; text-align: justify; line-height: 1.1; margin-bottom: 4px; height: 135px; overflow: hidden; }
-        .rev-signs { display: flex; justify-content: space-around; font-size: 5.5px; color: #444; margin-top: 5px; }
-        .rev-sign-line { border-top: 1px solid #94a3b8; width: 110px; margin: 15px auto 2px auto; }
-        .rev-alert-box { background-color: #f28c28; color: white; border-radius: 6px; padding: 4px; font-size: 6px; margin-top: 6px; text-align: center; }
-        .rev-vigencia { font-size: 8px; font-weight: bold; color: #d35400; margin-top: 4px; }
+        }}
+        .badge-fields-box {{ padding: 0 10px; }}
+        .badge-field-row {{ display: flex; margin-bottom: 3px; border-radius: 3px; overflow: hidden; font-size: 8.5px; font-family: monospace; border: 1px solid #cbd5e1; }}
+        .badge-field-label {{ background-color: {bg_color_header}; color: white; padding: 3px 4px; font-weight: bold; width: 40%; text-align: center; }}
+        .badge-field-val {{ background-color: rgba(241, 245, 249, 0.9); color: #1e293b; padding: 3px 4px; width: 60%; text-align: center; font-weight: bold; }}
     </style>
     """, unsafe_allow_html=True)
 
     rows_data = list(df.iterrows())
     
+    # Generar iterativamente las credenciales tomando la plantilla maestra configurada
     for _, row in rows_data:
         emp_id = str(row.get(col_id, ''))
         nombre_raw = str(row.get(col_nombre, ''))
@@ -144,19 +166,26 @@ if not df.empty:
         cargo = cargo_raw if cargo_raw != 'nan' else 'SIN PUESTO'
         nombre_formateado = nombre if nombre.upper().startswith("C.") else f"C. {nombre}"
 
-        # FRENTE HTML
+        # Buscar fotografía asociada
+        img_html = "👤"
+        for key, file_obj in dict_images.items():
+            if emp_id in key or nombre.split()[0] in key:
+                b64_str = base64.b64encode(file_obj.getvalue()).decode("utf-8")
+                img_html = f'<img src="data:image/jpeg;base64,{b64_str}">'
+                break
+
         front_html = f'''
         <div class="badge-card">
             <div class="badge-header">
-                <h4>ALCALDÍA DE CAMPECHE</h4>
-                <p>H. AYUNTAMIENTO DEL MUNICIPIO DE CAMPECHE 2024-2027</p>
+                <h4>{texto_header_1}</h4>
+                <p>{texto_header_2}</p>
             </div>
-            <div class="badge-photo">👤</div>
+            <div class="badge-photo-box">{img_html}</div>
             <div class="badge-auth">Se autoriza al</div>
             <div class="badge-name">{nombre_formateado}</div>
             <div class="badge-role-title">Como:</div>
             <div class="badge-role">{cargo}</div>
-            <div class="badge-footer-dept">Dirección de Desarrollo Urbano y Medio Ambiente</div>
+            <div class="badge-footer-dept">{texto_depto}</div>
             <div class="badge-fields-box">
                 <div class="badge-field-row">
                     <div class="badge-field-label">ID</div>
@@ -170,48 +199,15 @@ if not df.empty:
         </div>
         '''
 
-        # REVERSO HTML (con todos los elementos legales, firmas y recuadro inferior de contacto)
-        back_html = f'''
-        <div class="badge-card">
-            <div class="rev-header">
-                <div style="font-size:8px; font-weight:bold; color:#777;">ALCALDÍA DE</div>
-                <div style="font-size:11px; font-weight:bold; color:#f28c28; letter-spacing:0.5px;">CAMPECHE</div>
-            </div>
-            <div><span class="rev-folio">Folio &nbsp; 0{emp_id[-3:] if len(emp_id)>=3 else emp_id}/DDUMA/2026</span></div>
-            <div class="rev-legal">
-                <b>Esta credencial es válida únicamente para actos de naturaleza indicadas.</b><br>
-                La presente identificación se emite con fundamento en los artículos 14, 16, 115 fracción V, de la Constitución Política de los Estados Unidos Mexicanos; 105 de la Constitución Política del Estado de Campeche; 189, 190 de la Ley Orgánica de los Municipios del Estado de Campeche; 3, 37, 38, 39, 62, 63, 64, 65, 66, 67, 69 de la Ley de Procedimiento Administrativo para el Estado y los Municipios de Campeche; y ordenamientos aplicables; con vigencia al 31 de diciembre de 2026.
-            </div>
-            <div class="rev-signs">
-                <div>
-                    <div class="rev-sign-line"></div>
-                    <b>{nombre_formateado}</b><br>Firma del Trabajador
-                </div>
-                <div>
-                    <div class="rev-sign-line"></div>
-                    <b>Lic. Rosendo Sánchez Preve</b><br>Director de Desarrollo Urbano y Medio Ambiente
-                </div>
-            </div>
-            <div class="rev-alert-box">
-                <b>° El uso indebido de esta credencial constituye un delito.<br>° Quejas, denuncias y en caso de extravió:</b><br>
-                <span style="font-size:9px; font-weight:bold;">Tel: 981 102 1212</span>
-            </div>
-            <div class="rev-vigencia">Vigencia al 31 de diciembre de 2026</div>
-        </div>
-        '''
-
-        # Mostrar ambas caras lado a lado para cada empleado
-        col_f, col_r = st.columns(2)
-        with col_f:
-            st.markdown(f"**Frente (Empleado: {emp_id})**")
+        # Mostrar la credencial generada con base en la plantilla maestra
+        col_center = st.columns([1, 2, 1])
+        with col_center[1]:
+            st.markdown(f"**Credencial para: {nombre_formateado} (Emp: {emp_id})**")
             st.markdown(front_html, unsafe_allow_html=True)
-        with col_r:
-            st.markdown(f"**Reverso (Empleado: {emp_id})**")
-            st.markdown(back_html, unsafe_allow_html=True)
-        
-        st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
+            
+        st.markdown("<hr style='border: 1px dashed #cbd5e1; margin: 15px 0;'>", unsafe_allow_html=True)
 
-    st.success("💡 **Impresión masiva:** Presiona `Ctrl + P` en tu teclado para mandar a imprimir todas las credenciales (Frente y Reverso) en formato físico o guardarlas en PDF.")
+    st.success("💡 **Plantilla Maestra Lista:** Modifica cualquier texto o color en el menú lateral izquierdo. Al presionar `Ctrl + P`, la interfaz está adaptada para imprimir cómodamente en formato físico o PDF a la mitad de tu hoja carta.")
 
 else:
-    st.warning("No hay registros disponibles para mostrar.")
+    st.warning("No hay registros en la base de datos.")
