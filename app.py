@@ -75,7 +75,7 @@ st.markdown("Modifica los parámetros en la barra lateral izquierda y se actuali
 
 if not df.empty:
     
-    # Estilos CSS adaptados a las dimensiones físicas aproximadas para la mitad de una hoja carta
+    # Estilos CSS con llaves escapadas correctamente {{ }}
     bg_style = f"background-image: url('data:image/jpeg;base64,{bg_image_b64}'); background-size: cover; background-position: center;" if bg_image_b64 else "background-color: #ffffff;"
 
     st.markdown(f"""
@@ -99,7 +99,7 @@ if not df.empty:
             text-align: center;
             padding: 10px;
             margin-bottom: 20px;
-        }
+        }}
         .badge-header {{
             background-color: {bg_color_header};
             height: 105px;
@@ -125,7 +125,7 @@ if not df.empty:
             display: flex;
             align-items: center;
             justify-content: center;
-        }
+        }}
         .badge-photo-box img {{
             width: 100%;
             height: 100%;
@@ -155,7 +155,6 @@ if not df.empty:
 
     rows_data = list(df.iterrows())
     
-    # Generar iterativamente las credenciales tomando la plantilla maestra configurada
     for _, row in rows_data:
         emp_id = str(row.get(col_id, ''))
         nombre_raw = str(row.get(col_nombre, ''))
@@ -166,7 +165,6 @@ if not df.empty:
         cargo = cargo_raw if cargo_raw != 'nan' else 'SIN PUESTO'
         nombre_formateado = nombre if nombre.upper().startswith("C.") else f"C. {nombre}"
 
-        # Buscar fotografía asociada
         img_html = "👤"
         for key, file_obj in dict_images.items():
             if emp_id in key or nombre.split()[0] in key:
@@ -199,7 +197,6 @@ if not df.empty:
         </div>
         '''
 
-        # Mostrar la credencial generada con base en la plantilla maestra
         col_center = st.columns([1, 2, 1])
         with col_center[1]:
             st.markdown(f"**Credencial para: {nombre_formateado} (Emp: {emp_id})**")
